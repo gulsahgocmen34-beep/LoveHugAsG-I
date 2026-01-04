@@ -90,12 +90,39 @@ html,body{
   transform:translateX(-50%) scale(1);
 }
 
-/* HEART */
+/* HEART EFFECTS */
+.center-heart{
+  position:absolute;
+  font-size:24px;
+  color:#ff2d55;
+  animation:centerFloat 2.4s ease-out forwards;
+  pointer-events:none;
+  z-index:15;
+}
+@keyframes centerFloat{
+  from{opacity:1;transform:translate(-50%,0)}
+  to{opacity:0;transform:translate(-50%,-22vh) scale(1.8)}
+}
+
+.bottom-heart{
+  position:fixed;
+  bottom:-40px;
+  font-size:20px;
+  color:#ff5e8a;
+  animation:flyUp linear forwards;
+  pointer-events:none;
+  z-index:10;
+}
+@keyframes flyUp{
+  from{transform:translateY(0) scale(.8);opacity:0}
+  15%{opacity:1}
+  to{transform:translateY(-120vh) scale(1.6);opacity:0}
+}
+
 #bigHeart{
   position:fixed;
   left:50%;top:50%;
   font-size:30vw;
-  max-font-size:220px;
   transform:translate(-50%,-50%) scale(0);
   opacity:0;
   z-index:950;
@@ -105,6 +132,18 @@ html,body{
   30%{transform:translate(-50%,-50%) scale(2);opacity:1}
   55%{transform:translate(-50%,-50%) scale(3);opacity:1}
   100%{transform:translate(-50%,-50%) scale(0);opacity:0}
+}
+
+.pop-heart{
+  position:fixed;
+  left:50%;top:50%;
+  font-size:26px;
+  animation:flyOut 2.6s ease-out forwards;
+  pointer-events:none;
+  z-index:960;
+}
+@keyframes flyOut{
+  to{transform:translate(var(--x),var(--y)) scale(0);opacity:0}
 }
 
 /* REPLAY */
@@ -147,10 +186,9 @@ const bigHeart=document.getElementById("bigHeart");
 const replayBtn=document.getElementById("replayBtn");
 
 let step=0;
-const totalSteps=9;
-const stepDelay=350;
+const totalSteps=10;
+const stepDelay=360;
 
-/* START */
 function startGame(){
   startScreen.style.display="none";
   game.style.display="block";
@@ -159,12 +197,16 @@ function startGame(){
 startScreen.addEventListener("click",startGame);
 startScreen.addEventListener("touchstart",startGame);
 
-/* WALK */
 function walk(){
   const w=setInterval(()=>{
     step++;
-    girl.style.left = (5 + step*5) + "vw";
-    boy.style.right = (5 + step*5) + "vw";
+
+    const progress = step / totalSteps;
+    const maxOffset = 32; // vw
+    const offset = maxOffset * progress;
+
+    girl.style.left = (5 + offset) + "vw";
+    boy.style.right = (5 + offset) + "vw";
 
     if(step>=totalSteps){
       clearInterval(w);
@@ -173,7 +215,6 @@ function walk(){
   },stepDelay);
 }
 
-/* FINAL – TAM ORTADA KAVUŞMA */
 function finalScene(){
   girl.style.animation="none";
   boy.style.animation="none";
@@ -187,7 +228,6 @@ function finalScene(){
 
   girl.style.left = (centerX - totalWidth / 2) + "px";
   boy.style.left  = (centerX - totalWidth / 2 + girlW) + "px";
-
   boy.style.right="auto";
   boy.style.transform="scaleX(1)";
 
@@ -196,11 +236,56 @@ function finalScene(){
   speech.classList.add("show");
 
   youWin.classList.add("show");
+
+  startCenterHearts(centerX, groundY + 80);
+  startBottomHearts();
+
   bigHeart.style.animation="heartPop 1.6s ease-out forwards";
+  setTimeout(popHearts,700);
+
   replayBtn.style.display="block";
 }
 
-/* REPLAY */
+/* HEART EFFECTS */
+function startCenterHearts(x,y){
+  const i=setInterval(()=>{
+    const h=document.createElement("div");
+    h.className="center-heart";
+    h.textContent="❤";
+    h.style.left = x + (Math.random()*60-30) + "px";
+    h.style.bottom = y + "px";
+    game.appendChild(h);
+    setTimeout(()=>h.remove(),2400);
+  },300);
+  setTimeout(()=>clearInterval(i),2600);
+}
+
+function startBottomHearts(){
+  const i=setInterval(()=>{
+    const h=document.createElement("div");
+    h.className="bottom-heart";
+    h.textContent="❤";
+    h.style.left=Math.random()*100+"vw";
+    h.style.fontSize=16+Math.random()*14+"px";
+    h.style.animationDuration=4+Math.random()*3+"s";
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),8000);
+  },140);
+  setTimeout(()=>clearInterval(i),4000);
+}
+
+function popHearts(){
+  for(let i=0;i<40;i++){
+    const h=document.createElement("div");
+    h.className="pop-heart";
+    h.textContent="❤";
+    h.style.setProperty("--x",(Math.random()*800-400)+"px");
+    h.style.setProperty("--y",(Math.random()*800-400)+"px");
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),2600);
+  }
+}
+
 replayBtn.onclick=()=>location.reload();
 </script>
 
